@@ -19,9 +19,9 @@ typedef std::vector<Term> Espression;
 
 // Definitions for literals
 typedef enum{
-    FALSE = 0,
+    FALSE = -1,
     TRUE = 1,
-    UNASSIGNED = -1
+    UNASSIGNED = 0
 } LiteralValue;
 
 // Current state of Solver
@@ -37,8 +37,7 @@ private:
     bool BCP(currentState& state);
 
 public:
-
-    //Constructor which parses the CNF file and initializes the data structures
+    //Constructor which parses the CNF file and initializes relevant structs
     SATSolver(const CNF* parCNF);
 
     //DPLL Recursive Function
