@@ -28,6 +28,7 @@ void SATSolver::BCP(currentState& state) {
         int unitLiteral = 0; // Init unitLiteral tracker
 
         // For each clause
+        // can start at 0 since we are not using assignment array
         for (int i = 0; i < state.cEspression.size(); i++){
             int count = 0; // Literal count "Count =0"
             bool localSat = false; // Local satisfaction tracker
@@ -83,10 +84,76 @@ void SATSolver::BCP(currentState& state) {
 // Followed PureLiteral Elimination Pseudo code from brown
 //https://cs.brown.edu/courses/cs195y/2016/assignments/sat-lab.html
 void SATSolver::PureLiteralElimination(currentState& state){
-    /*for each variable x
-        if +/-x is pure in F
-            remove all clauses containing +/-x
-            add a unit clause {+/-x}*/
+    
+    // loop till no pure literals
+    while(true){
+        int pureLiteralCount = 0; // tracker for exit
+        
+        // Due to in-place updating to limit memory usage, we check for pure literals
+        
+        // arrays to track +/- of literals
+        std::vector<int> posXArr(state.numLiterals + 1, 0); // +1 for DIMACs consistency
+        std::vector<int> negXArr(state.numLiterals + 1, 0);
+
+
+        // For each clause, check for pure literals and add to arrays
+        for (int i = 0; i < state.cEspression.size(); i++){
+            bool isSat = false; //Local sat tracker since in-place and may already be satisfied
+            
+            for(int j = 0; j < state.cEspression[i].size(); j++){
+                int lit = state.cEspression[i][j]; // Get literal
+                int varIdx = std::abs(lit); // Get var index
+                LiteralValue val = state.assignment[varIdx]; // Get val for var
+                if ((val == TRUEVal && lit > 0) || (val == FALSEVal && lit < 0)){
+                    isSat = true; // Clause sat, skip clause
+                    break;
+                }
+            }
+
+            if(isSat){
+                continue; // skip clause if sat
+            }
+
+            // If not satisfied, check for pure literals
+            // 2nd for loop to check for pure lit in unsat clauses
+            // This is due to in-place updates
+            for(int k = 0; k < state.cEspression[i].size(); k++){
+                int lit = state.cEspression[i][k]; // Get literal
+                int varIdx = std::abs(lit); // Get var index
+                LiteralValue val = state.assignment[varIdx]; // Get val for var
+
+                if (val == UNASSIGNED){ // Only consider unassigned literals for purity
+                    if (lit > 0){
+                        posXArr[varIdx] = 1;
+                    } else {
+                        negXArr[varIdx] = 1;
+                    }
+                }
+            }
+        }
+        //for each variable x
+        for(int l = 1; l <= state.numLiterals; l++){
+            // check if literal is unassigned
+            if(state.assignment[l]==UNASSIGNED){
+                // if +x is pure in F
+                if(posXArr[l] == 1 && negXArr[l] == 0){ // If pos literal is pure
+                    
+                    state.assignment[l] = TRUEVal; // Set literal to true is equiv to remove all clauses containing +x
+                    // add a unit clause{+x} is unneccessary due to in-place update
+                    
+                    pureLiteralCount++; // Increment pure literal count
+                
+                // if -x is pure in F
+                } else if (negXArr[l] == 1 && posXArr[l] == 0){ // If neg literal is pure
+                    state.assignment[l] = FALSEVal; // Set literal to false
+                    pureLiteralCount++; // Increment pure literal count
+                }
+            }
+        }
+        if(pureLiteralCount == 0){
+            break; // If no pure literals, break out of while loop
+        }
+    }
 }
 
 
@@ -145,7 +212,26 @@ bool SATSolver::DPLL(currentState state){
 
     // Try when literal is false
     currentState newFState = state; // Create  new state for dpll call
-    newFState.assignment[chosenLiteral] = FALSEVal; // Add negated literal to new
+    newFState.assignment[chosenLiteral] = FALSEVal; // Add neg Literal
 
     return DPLL(newFState); // Return result of dpll call
+}
+
+void SATSolver::solve(){
+    DPLL(state); // Start DPLL
+}
+
+void SATSolver::printAssignment(){
+    if(state.Sat == true){
+        std::cout << "RESULT:SAT" << std::endl << "ASSIGNMENT: ";
+        for (int i = 1; i <= state.numLiterals; i++){
+            if(state.assignment[i] == TRUEVal){
+                std::cout << i << "=1" << " ";
+            } else if (state.assignment[i] == FALSEVal){
+                std::cout << i << "=0" << " ";
+            }
+        }
+    }else{
+        std::cout << "RESULT:UNSAT" << std::endl;  
+    }  
 }

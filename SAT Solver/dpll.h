@@ -5,7 +5,7 @@
 #include <iostream>
 #include <functional>
 
-// Dictate compliation with C linkage for the Dimacs parser
+// C linkage for the Dimacs parser
 extern "C" {
     // Dimacs parser struct
     typedef struct {
@@ -55,10 +55,10 @@ public:
 
     //DPLL Recursive Function
     bool DPLL(currentState state);
-    
-    // Start the DPLL algo
+
+    // Helper funcs for encapsulation
     void solve();
-    void printResult();
+    void printAssignment();
 };
 
 #endif /* dpll_h */
