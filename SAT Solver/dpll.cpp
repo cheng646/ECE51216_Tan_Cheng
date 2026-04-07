@@ -231,6 +231,7 @@ void SATSolver::printAssignment(){
                 std::cout << i << "=0" << " ";
             }
         }
+        std::cout << std::endl;
     }else{
         std::cout << "RESULT:UNSAT" << std::endl;  
     }  
