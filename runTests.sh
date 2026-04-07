@@ -5,7 +5,7 @@
 #!/bin/bash
 
 # Define the folder containing the benchmarks
-BENCHMARK_DIR="Benchmark Files/uf20-91"
+BENCHMARK_DIR="Benchmark Files/uf250-1065"
 SOLVER="SAT Solver/mySAT"
 OUTPUT_FILE="test_results.txt"
 
