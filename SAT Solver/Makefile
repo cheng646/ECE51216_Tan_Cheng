@@ -2,7 +2,7 @@ mySAT: dimacs_parser.o dpll.o main.o
 	g++ -o mySAT dimacs_parser.o dpll.o main.o
 
 dimacs_parser.o: dimacs_file_parser.c
-	gcc -c dimacs_file_parser.c
+	gcc -c dimacs_file_parser.c -o dimacs_parser.o
 
 dpll.o: dpll.cpp dpll.h
 	g++ -c dpll.cpp -o dpll.o

@@ -218,12 +218,12 @@ bool SATSolver::DPLL(currentState state){
 }
 
 void SATSolver::solve(){
-    DPLL(state); // Start DPLL
+    state.Sat = DPLL(state); // Start DPLL
 }
 
 void SATSolver::printAssignment(){
     if(state.Sat == true){
-        std::cout << "RESULT:SAT" << std::endl << "ASSIGNMENT: ";
+        std::cout << "RESULT:SAT" << std::endl << "ASSIGNMENT:";
         for (int i = 1; i <= state.numLiterals; i++){
             if(state.assignment[i] == TRUEVal){
                 std::cout << i << "=1" << " ";
