@@ -5,9 +5,9 @@
 #!/bin/bash
 
 # Define the folders and files
-BENCHMARK_DIR="Benchmark Files/uf20-91"
+BENCHMARK_DIR="Benchmark Files/uuf50-218"
 SOLVER="SAT Solver/mySAT"
-CSV_FILE="test_results.csv"
+CSV_FILE="data/test_results.csv"
 
 # 1. Update the CSV header to include the new Internal Solve Time column
 echo "Filename,Result,Internal Solve Time (s),Total System Time (s),Peak Memory (KB)" > "$CSV_FILE"
@@ -22,7 +22,7 @@ for file in "$BENCHMARK_DIR"/*.cnf; do
     base_name=$(basename "$file")
     
     # Run the solver and the time command NOTE Add "--dlis" after "$file" for dlis tests
-    /usr/bin/time -f "%e,%M" -o temp_time.txt "./$SOLVER" "$file" --dlis> temp_out.txt
+    /usr/bin/time -f "%e,%M" -o temp_time.txt "./$SOLVER" "$file" > temp_out.txt
     
     # Parse the SAT/UNSAT result
     result=$(grep "RESULT:" temp_out.txt | cut -d':' -f2)
