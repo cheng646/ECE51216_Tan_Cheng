@@ -4,7 +4,7 @@
 #include <chrono> //For algo runtime
 
 // Simple Heuristic of choosing the first unassign literal following the slide example
-int normHeuristic(currentState& state){
+int normHeuristic(currentState& state, const Espression& cEspression){
     for (int i = 1; i <= state.numLiterals; i++) { // Start at 1 for DIMACs consistency
         if (state.assignment[i] == UNASSIGNED) {
             return i; // Return the first unassigned literal
@@ -14,7 +14,7 @@ int normHeuristic(currentState& state){
 }
 
 // Reference https://www.cs.cmu.edu/~emc/15-820A/reading/sat_cmu.pdf
-int dlisHeuristic(currentState& state){
+int dlisHeuristic(currentState& state, const Espression& cEspression){
     // Following Pseudocode: vectors holding the count for both + and - literals
     std::vector<int> posCount(state.numLiterals +1, 0);
     std::vector<int> negCount(state.numLiterals +1, 0);
@@ -24,12 +24,12 @@ int dlisHeuristic(currentState& state){
 
 
     // Query clauses to add to count vectors
-    for (int i = 0; i< state.cEspression.size(); i++){
+    for (int i = 0; i< cEspression.size(); i++){
         bool isSat = false; //Initial state is false
         tUnassigned.clear(); // Clear the vector. Reuse for less memory
 
-        for(int j = 0; j< state.cEspression[i].size();j++){
-            int lit = state.cEspression[i][j];
+        for(int j = 0; j< cEspression[i].size();j++){
+            int lit = cEspression[i][j];
             int varIdx= std::abs(lit); //same literal regardless true or false
             LiteralValue val = state.assignment[varIdx];
 
@@ -77,7 +77,7 @@ int dlisHeuristic(currentState& state){
     // Edge case no literals left in clauses 
     // let the normal heurisitc choose to not get stuck
     if (bestPos == 0 && bestNeg == 0){
-        return normHeuristic(state);
+        return normHeuristic(state, cEspression);
     }
 
     if (maxPosCount > maxNegCount){
@@ -107,7 +107,7 @@ int main(int argc, char* argv[]){
     // Parse debug msg remove later
     //std::cout << "Parsing" << std::endl;
     CNF input = parse_dimacs(argv[1]); //call dimacs parser
-    std::function<int(currentState&)> heuristicSel;
+    std::function<int(currentState&, const Espression&)> heuristicSel;
 
     if(useDlis){
         heuristicSel = dlisHeuristic;
@@ -116,7 +116,7 @@ int main(int argc, char* argv[]){
     }
 
     // Solver time
-    SATSolver solver(&input, normHeuristic); // Populate
+    SATSolver solver(&input, heuristicSel); // Populate
     //std::cout << "Populated" << std::endl;
 
     auto start = std::chrono::high_resolution_clock::now(); //start time

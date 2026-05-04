@@ -35,7 +35,6 @@ typedef enum{
 
 // Current state of Solver
 typedef struct {
-    Espression cEspression; // Current espression of clauses and literals
     std::vector<LiteralValue> assignment; //Assignment for sat/unsat mapped to literals
     int numLiterals; // Number of literals in the problem
     bool Sat; // Satisfied? For BCP and DPLL to update
@@ -46,12 +45,15 @@ private:
     // Holding espression and assignment (For full espression)
     currentState state;
 
+    // Code refactor with cEspression saved in class so it is not copied constantly
+    Espression cEspression; // Current espression of clauses and literals
+
     void BCP(currentState& state); // Binary Constraint Prop Func, return false for conflicts
     void PureLiteralElimination(currentState& state); // From DPLL pseudo code
-    std::function<int(currentState&)> heuristic; // Heuristic pointer function for variable selection (can choose DLIS in main)
+    std::function<int(currentState&, const Espression&)> heuristic; // Heuristic pointer function for variable selection (can choose DLIS in main)
 public:
     //Constructor which parses the CNF file and initializes relevant structs, takes heuristic function arg
-    SATSolver(const CNF* parCNF, std::function<int(currentState&)> heuristicFunc);
+    SATSolver(const CNF* parCNF, std::function<int(currentState&, const Espression&)> heuristicFunc);
 
     //DPLL Recursive Function
     bool DPLL(currentState state);

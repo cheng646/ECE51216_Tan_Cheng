@@ -3,7 +3,7 @@
 #include <cmath>
 
 //Constructor
-SATSolver::SATSolver(const CNF* parCNF, std::function<int(currentState&)> heuristicFunc) : heuristic(heuristicFunc) {
+SATSolver::SATSolver(const CNF* parCNF, std::function<int(currentState&, const Espression&)> heuristicFunc) : heuristic(heuristicFunc) {
     // Initialize the current state with the parsed CNF
     state.numLiterals = parCNF->num_vars;
 
@@ -16,7 +16,7 @@ SATSolver::SATSolver(const CNF* parCNF, std::function<int(currentState&)> heuris
         for (int j = 0; j < parCNF->clause_sizes[i]; j++) {
             term.push_back(parCNF->clauses[i][j]); // Add literals one by one
         }
-        state.cEspression.push_back(term); // Add the full term to expression
+        this->cEspression.push_back(term); // Add the full term to expression
     }
 }
 
@@ -29,14 +29,14 @@ void SATSolver::BCP(currentState& state) {
 
         // For each clause
         // can start at 0 since we are not using assignment array
-        for (int i = 0; i < state.cEspression.size(); i++){
+        for (int i = 0; i < this->cEspression.size(); i++){
             int count = 0; // Literal count "Count =0"
             bool localSat = false; // Local satisfaction tracker
             int unassignedLit = 0; // Unassigned literal tracker
 
             // For each literal in clause
-            for(int j = 0; j < state.cEspression[i].size(); j++){
-                int lit = state.cEspression[i][j]; // Get literal
+            for(int j = 0; j < this->cEspression[i].size(); j++){
+                int lit = this->cEspression[i][j]; // Get literal
                 int varIdx = std::abs(lit); // Get variable index (abs value of literal)
                 LiteralValue val = state.assignment[varIdx]; //Get val for var
                 
@@ -97,11 +97,11 @@ void SATSolver::PureLiteralElimination(currentState& state){
 
 
         // For each clause, check for pure literals and add to arrays
-        for (int i = 0; i < state.cEspression.size(); i++){
+        for (int i = 0; i < this->cEspression.size(); i++){
             bool isSat = false; //Local sat tracker since in-place and may already be satisfied
             
-            for(int j = 0; j < state.cEspression[i].size(); j++){
-                int lit = state.cEspression[i][j]; // Get literal
+            for(int j = 0; j < this->cEspression[i].size(); j++){
+                int lit = this->cEspression[i][j]; // Get literal
                 int varIdx = std::abs(lit); // Get var index
                 LiteralValue val = state.assignment[varIdx]; // Get val for var
                 if ((val == TRUEVal && lit > 0) || (val == FALSEVal && lit < 0)){
@@ -117,8 +117,8 @@ void SATSolver::PureLiteralElimination(currentState& state){
             // If not satisfied, check for pure literals
             // 2nd for loop to check for pure lit in unsat clauses
             // This is due to in-place updates
-            for(int k = 0; k < state.cEspression[i].size(); k++){
-                int lit = state.cEspression[i][k]; // Get literal
+            for(int k = 0; k < this->cEspression[i].size(); k++){
+                int lit = this->cEspression[i][k]; // Get literal
                 int varIdx = std::abs(lit); // Get var index
                 LiteralValue val = state.assignment[varIdx]; // Get val for var
 
@@ -197,7 +197,7 @@ bool SATSolver::DPLL(currentState state){
     
     //DPLL Procedure:
     // l <- choose-literal(Φ) | Heuristic func
-    int chosenLiteral = heuristic(state);
+    int chosenLiteral = heuristic(state, this->cEspression);
     //op
 
     // return DPLL(Φ ∧ l) or DPLL(Φ ∧ ¬l)

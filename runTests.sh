@@ -22,7 +22,7 @@ for file in "$BENCHMARK_DIR"/*.cnf; do
     base_name=$(basename "$file")
     
     # Run the solver and the time command NOTE Add "--dlis" after "$file" for dlis tests
-    /usr/bin/time -f "%e,%M" -o temp_time.txt "./$SOLVER" "$file" > temp_out.txt
+    /usr/bin/time -f "%e,%M" -o temp_time.txt "./$SOLVER" "$file" --dlis> temp_out.txt
     
     # Parse the SAT/UNSAT result
     result=$(grep "RESULT:" temp_out.txt | cut -d':' -f2)
